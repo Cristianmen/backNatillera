@@ -15,6 +15,8 @@ class DynamoDBClass {
     };
 
     async putUser(data) {
+
+        
         return new Promise(async (resolve, reject) => {
             try {
                 params = {};
