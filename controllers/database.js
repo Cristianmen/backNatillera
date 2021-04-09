@@ -9,6 +9,8 @@ class DynamoDBClass {
 
     constructor() {
         this.dynamoDB = new AWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
+         
+        
 
     };
 
