@@ -18,6 +18,8 @@ class DynamoDBClass {
 
         
         return new Promise(async (resolve, reject) => {
+
+            
             try {
                 params = {};
                 params.TableName = USERS_TABLE;
