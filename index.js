@@ -71,7 +71,6 @@ function responseHtt(status, message, output) {
     ),
   };
 
-
 }
 
 
