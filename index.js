@@ -5,6 +5,8 @@ const databaseCtrl = require('./controllers/database');
 let usersDB = null,
   data;
 
+  
+
 async function query(event) {
   console.log('event: query -> ', event);
   usersDB = new databaseCtrl();
