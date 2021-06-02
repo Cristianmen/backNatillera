@@ -42,7 +42,6 @@ async function create(event) {
     console.log('resulInsert: ', resulInsert);
 
 
-
     // resulInsert.then(() => {
     //   console.log('then: ', then);
     // }).catch((error) => {
