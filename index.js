@@ -1,11 +1,12 @@
 'use strict';
 
 const databaseCtrl = require('./controllers/database');
+const UserClass = require('./controllers/createUser');
 
 let usersDB = null,
   data;
 
-  
+
 
 async function query(event) {
   console.log('event: query -> ', event);
@@ -30,33 +31,22 @@ async function query(event) {
 
 async function create(event) {
 
+  let response = null;
   console.log('create: create -> ', event);
   data = JSON.parse(event.body);
   try {
-    usersDB = new databaseCtrl();
-    const userId = data.user,
-      name = data.name;
+    const user = new UserClass(data); 
+    console.log('user: ', user);   
 
-    // const resulInsert = await usersDB.queryUser( userId);
-    const resulInsert = await usersDB.putUser({ userId, name });
-    // const resulInsert = await usersDB.scanUser();
-    console.log('resulInsert: ', typeof resulInsert);
-    console.log('resulInsert: ', resulInsert);
+    response = await user.createUser(event);
 
-
-    // resulInsert.then(() => {
-    //   console.log('then: ', then);
-    // }).catch((error) => {
-
-    //   console.log('error: ', error);
-    // });
-
-    return responseHtt(200, 'peticions exitosa', resulInsert);
+    console.log('response ', response);
+    return response;
 
 
   } catch (error) {
     console.log('catch/error: ', error);
-    return responseHtt(500, 'Error', error);
+    return responseHtt(404, 'Error EN INDEX', error);
   }
 };
 

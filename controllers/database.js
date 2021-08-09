@@ -10,8 +10,6 @@ class DynamoDBClass {
     constructor() {
         this.dynamoDB = new AWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
          
-        
-
     };
 
     async putUser(data) {
@@ -20,7 +18,6 @@ class DynamoDBClass {
                 params = {};
                 params.TableName = USERS_TABLE;
                 params.Item = data
-
                 console.log('putUser -> params:  ', params);
                 const resul = await this.dynamoDB.put(params).promise();
                 console.log('putUser -> resul:  ', resul);
