@@ -1,69 +1,53 @@
 'use strict';
 
-const databaseCtrl = require('./controllers/database');
+const serverless = require('serverless-http');
+const express = require('express');
+const app = express();
+const cors = require('cors');
+const DynamoDBClass = require('./controllers/database');
 const UserClass = require('./controllers/createUser');
+const ResponseClass = require('./commons/response');
 
 let usersDB = null,
   data;
 
-
-
-async function query(event) {
-  console.log('event: query -> ', event);
-  usersDB = new databaseCtrl();
+app.post('/login', cors(), async (req, res) => {
   try {
-    if (event.pathParameters) {
-      const path = event.pathParameters.user;
-      console.log('path -> ', path);
-      const resulquery = await usersDB.queryUser(path);
-      return responseHtt(200, 'peticions exitosa/queryUser', resulquery);
+
+    const body = JSON.parse(req.apiGateway.event.body);
+    const { username, password } = body;
+    
+    console.log('/username ', username);
+    const userDB = new DynamoDBClass();
+    const resulquery = await userDB.queryUser(username);
+    console.log('resulquery ', resulquery);
+    const resp = new ResponseClass();
+
+    if (resulquery.Item) {
+      if (resulquery.Item.userId === username && resulquery.Item.password === password) {
+        console.log('success 200');
+        res.json(resp.success);
+      } else {
+        console.log('error en validacion de usuario  ');
+        res.status(404).json(resp.NOT_FOUND_RESOURCE);
+      }
     } else {
-      const resulquery = await usersDB.scanUser();
-      return responseHtt(200, 'peticions exitosa/scanUser', resulquery);
+      console.log('error en consulta de usuario');
+      res.status(404).json(resp.NOT_FOUND_RESOURCE);
     }
-  } catch (error) {
-    console.log('catch/error: ', error);
-    return responseHtt(500, 'Error', error);
-  }
-
-
-};
-
-async function create(event) {
-
-  let response = null;
-  console.log('create: create -> ', event);
-  data = JSON.parse(event.body);
-  try {
-    const user = new UserClass(data); 
-    console.log('user: ', user);   
-
-    response = await user.createUser(event);
-
-    console.log('response ', response);
-    return response;
-
 
   } catch (error) {
     console.log('catch/error: ', error);
-    return responseHtt(404, 'Error EN INDEX', error);
+    res.status(500).json({
+      error: error
+    });
   }
-};
-
-function responseHtt(status, message, output) {
-  return {
-    statusCode: status,
-    body: JSON.stringify(
-      {
-        message: message,
-        input: output,
-      },
-      null,
-    ),
-  };
-
-}
+   
+});
 
 
-module.exports.query = query;
-module.exports.create = create;
+
+
+
+
+module.exports.generic = serverless(app);

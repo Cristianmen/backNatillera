@@ -74,28 +74,11 @@ provider:
 #    - include-me-dir/**
 
 functions:
-  query:
-    handler: index.query
+  app:
+    handler: index.generic
     events:
-      - httpApi:
-          path: /users/query
-          method: get
-      - httpApi:
-          path: /users/query/{user}
-          method: get
-          documentation:
-            pathParams:
-              -
-                name: "user"
-                description: "user"
-                required: true
-                type: string
-  create:
-    handler: index.create
-    events:
-      - httpApi:
-          path: /users/create
-          method: post
+      - http: ANY /
+      - http: ANY {proxy+}
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details

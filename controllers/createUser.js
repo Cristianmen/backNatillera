@@ -6,9 +6,12 @@ const ResponseClass = require('../commons/response');
 
 class UserClass {
     user = {
-        userId: '',
+        id:'',
         name:'',
         lastName:'',
+        email:'',
+        admin: false,
+        username: '',
         password: '',
         activity:[],
         saving:[],
@@ -18,10 +21,13 @@ class UserClass {
 
     constructor(data) {
         console.log('constructor: data', data);
-        this.user.userId = data.user;
+        this.user.id = data.id;
+        this.user.email = data.email;
+        this.user.username = data.username;
+        this.user.password = data.password;
+        this.user.admin = data.admin;
         this.user.name = data.name;
         this.user.lastName = data.lastName;
-        this.user.password = data.password; 
          
     };
 
