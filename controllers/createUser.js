@@ -6,12 +6,13 @@ const ResponseClass = require('../commons/response');
 
 class UserClass {
     user = {
-        id:'',
+        userId:'',
         name:'',
         lastName:'',
         email:'',
         admin: false,
-        username: '',
+        id: '',
+        status: true,
         password: '',
         activity:[],
         saving:[],
@@ -21,9 +22,9 @@ class UserClass {
 
     constructor(data) {
         console.log('constructor: data', data);
-        this.user.id = data.id;
+        this.user.userId = data.userId.toLowerCase();
         this.user.email = data.email;
-        this.user.username = data.username;
+        this.user.id = data.id;
         this.user.password = data.password;
         this.user.admin = data.admin;
         this.user.name = data.name;
@@ -35,7 +36,7 @@ class UserClass {
         return this.user;
     }
 
-    async  createUser(event) {
+    async  createUser() {
         try {
             console.log('createUser ');
             const usersDB = new databaseCtrl();
@@ -43,18 +44,12 @@ class UserClass {
             const resulInsert = await usersDB.putUser(this.user);
 
             console.log('resulInsert ', resulInsert);
-            return  ResponseClass.SAVE_SUCCESS;
+            return  true;
         }
         catch(error){
 
             console.log('catch/error createUser: ', error);
-            return {
-                statusCode: 500,
-                body:{
-                     message: "InternalError",
-                    detail: "Internal server error"
-                }
-            };
+            return false
 
         }
 

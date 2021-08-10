@@ -45,6 +45,40 @@ app.post('/login', cors(), async (req, res) => {
    
 });
 
+app.post('/CreateUser', cors(), async (req, res) => {
+  try {
+    
+    const body = JSON.parse(req.apiGateway.event.body);
+    console.log('body ', body);
+    
+   
+    const usersClass = new UserClass(body);
+    console.log('body ', body);
+    const resulquery = await usersClass.createUser();
+    console.log('resulquery ', resulquery);
+    const resp = new ResponseClass();
+
+    if (resulquery) {
+       console.log('success 200');
+    res.json(resp.success);
+    } else {
+      console.log('error en validacion de usuario  ');
+      res.status(404).json(resp.NOT_FOUND_RESOURCE);
+      
+    }
+   
+
+    
+
+  } catch (error) {
+    console.log('catch/error: ', error);
+    res.status(500).json({
+      error: error
+    });
+  }
+   
+});
+
 
 
 
