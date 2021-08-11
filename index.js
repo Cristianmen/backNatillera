@@ -1,79 +1,186 @@
 'use strict';
 
-const databaseCtrl = require('./controllers/database');
+const serverless = require('serverless-http');
+const express = require('express');
+const app = express();
+const cors = require('cors');
+const DynamoDBClass = require('./controllers/database');
+const UserClass = require('./controllers/createUser');
+const ResponseClass = require('./commons/response');
 
 let usersDB = null,
   data;
 
-async function query(event) {
-  console.log('event: query -> ', event);
-  usersDB = new databaseCtrl();
+app.post('/login', cors(), async (req, res) => {
   try {
-    if (event.pathParameters) {
-      const path = event.pathParameters.user;
-      console.log('path -> ', path);
-      const resulquery = await usersDB.queryUser(path);
-      return responseHtt(200, 'peticions exitosa/queryUser', resulquery);
+
+    const body = JSON.parse(req.apiGateway.event.body);
+    const { username, password } = body;
+
+    console.log('/username ', username);
+    const userDB = new DynamoDBClass();
+    const resulquery = await userDB.queryUser(username);
+    console.log('resulquery ', resulquery);
+    const resp = new ResponseClass();
+
+    if (resulquery.Item) {
+      if (resulquery.Item.userId === username && resulquery.Item.password === password) {
+
+        if (resulquery.Item.status) {
+          console.log('success 200');
+          const data = {
+            userId: resulquery.Item.userId,
+            name: resulquery.Item.name,
+            lastName: resulquery.Item.lastName,
+            admin: resulquery.Item.admin
+
+          }
+          res.json({
+            statusCode: 200,
+            message: "Success",
+            detail: "Success",
+            body: data
+          });
+
+        } else {
+          console.log('error en validacion de usuario  ');
+          res.status(404).json(resp.NOT_FOUND_RESOURCE);
+
+        }
+
+      } else {
+        console.log('error en validacion de usuario  ');
+        res.status(404).json(resp.NOT_FOUND_RESOURCE);
+      }
     } else {
-      const resulquery = await usersDB.scanUser();
-      return responseHtt(200, 'peticions exitosa/scanUser', resulquery);
+      console.log('error en consulta de usuario');
+      res.status(404).json(resp.NOT_FOUND_RESOURCE);
     }
+
   } catch (error) {
     console.log('catch/error: ', error);
-    return responseHtt(500, 'Error', error);
+    res.status(500).json({
+      error: error
+    });
   }
 
+});
 
-};
-
-async function create(event) {
-
-  console.log('create: create -> ', event);
-  data = JSON.parse(event.body);
+app.post('/user', cors(), async (req, res) => {
   try {
-    usersDB = new databaseCtrl();
-    const userId = data.user,
-      name = data.name;
 
-    // const resulInsert = await usersDB.queryUser( userId);
-    const resulInsert = await usersDB.putUser({ userId, name });
-    // const resulInsert = await usersDB.scanUser();
-    console.log('resulInsert: ', typeof resulInsert);
-    console.log('resulInsert: ', resulInsert);
+    const body = JSON.parse(req.apiGateway.event.body);
+    const { username } = body;
+
+    console.log('/username ', username);
+    const userDB = new DynamoDBClass();
+    const resulquery = await userDB.queryUser(username);
+    console.log('resulquery ', resulquery);
+    const resp = new ResponseClass();
+
+    if (resulquery.Item) {
+
+      console.log('success 200');
+      const data = {
+        userId: resulquery.Item.userId,
+        id: resulquery.Item.id,
+        status: resulquery.Item.status,
+        name: resulquery.Item.name,
+        lastName: resulquery.Item.lastName,
+        admin: resulquery.Item.admin,
+        email: resulquery.Item.email
+
+      }
+      res.json({
+        statusCode: 200,
+        message: "Success",
+        detail: "Success",
+        body: data
+      });
 
 
+    } else {
+      console.log('error en consulta de usuario');
+      res.status(404).json(resp.NOT_FOUND_RESOURCE);
+    }
 
-    // resulInsert.then(() => {
-    //   console.log('then: ', then);
-    // }).catch((error) => {
+  } catch (error) {
+    console.log('catch/error: ', error);
+    res.status(500).json({
+      error: error
+    });
+  }
 
-    //   console.log('error: ', error);
-    // });
+});
 
-    return responseHtt(200, 'peticions exitosa', resulInsert);
+app.post('/createUser', cors(), async (req, res) => {
+  try {
+
+    const body = JSON.parse(req.apiGateway.event.body);
+    console.log('body ', body);
+
+
+    const usersClass = new UserClass(body);
+    console.log('body ', body);
+    const resulquery = await usersClass.createUser();
+    console.log('resulquery ', resulquery);
+    const resp = new ResponseClass();
+
+    if (resulquery) {
+      console.log('success 200');
+      res.json(resp.SUCCESS);
+    } else {
+      console.log('error en validacion de usuario  ');
+      res.status(404).json(resp.NOT_FOUND_RESOURCE);
+
+    }
 
 
   } catch (error) {
     console.log('catch/error: ', error);
-    return responseHtt(500, 'Error', error);
+    res.status(500).json({
+      error: error
+    });
   }
-};
 
-function responseHtt(status, message, output) {
-  return {
-    statusCode: status,
-    body: JSON.stringify(
-      {
-        message: message,
-        input: output,
-      },
-      null,
-    ),
-  };
+});
+
+app.get('/users', cors(), async (req, res) => {
+  try {
+    console.log('/user ');
+    const resp = new ResponseClass();
+    const userDB = new DynamoDBClass();
+    const resulquery = await userDB.scanUser();
+
+    console.log('resulquery ', resulquery);
 
 
-}
+
+    if (resulquery) {
+      console.log('success 200');
+
+      res.json({
+        statusCode: 200,
+        message: "Success query",
+        detail: "Success",
+        body: resulquery.Items
+      });
+    } else {
+      console.log('error en validacion de usuario  ');
+      res.status(404).json(resp.NOT_FOUND_RESOURCE);
+
+    }
 
 
-module.exports.query = query;
-module.exports.create = create;
+  } catch (error) {
+    console.log('catch/error: ', error);
+    res.status(500).json({
+      error: error
+    });
+  }
+
+});
+
+
+
+module.exports.generic = serverless(app);
