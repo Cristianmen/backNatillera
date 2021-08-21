@@ -35,6 +35,9 @@ class UserClass {
     getUser() {
         return this.user;
     }
+    setUser(User) {
+        this.user = User;
+    }
 
     async  createUser() {
         try {

@@ -34,9 +34,9 @@ class DynamoDBClass {
                 params.TableName = USERS_TABLE;
                 params.Key = { userId: value};
 
-                console.log('putUser -> params:  ', params);
+                console.log('queryUser -> params:  ', params);
                 const resul = await this.dynamoDB.get(params).promise();
-                console.log('putUser -> resul:  ', resul);
+                console.log('queryUser -> resul:  ', resul);
                 resolve(resul);
             } catch (error) {
                 reject(error);
@@ -51,9 +51,9 @@ class DynamoDBClass {
                 params.TableName = USERS_TABLE;
                 params.ProjectionExpression = 'userId';
 
-                console.log('putUser -> params:  ', params);
+                console.log('scanUser -> params:  ', params);
                 const resul = await this.dynamoDB.scan(params).promise();
-                console.log('putUser -> resul:  ', resul);
+                console.log('scanUser -> resul:  ', resul);
                 resolve(resul);
             } catch (error) {
                 reject(error);
