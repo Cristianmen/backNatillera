@@ -6,6 +6,7 @@ const app = express();
 const cors = require('cors');
 const DynamoDBClass = require('./controllers/database');
 const UserClass = require('./controllers/createUser');
+const ActivityClass = require('./controllers/activityClass');
 const ResponseClass = require('./commons/response');
 
 let usersDB = null,
@@ -516,6 +517,74 @@ app.post('/getLoan', cors(), async (req, res) => {
       console.log('error en consulta de usuario');
       res.status(404).json(resp.NOT_FOUND_RESOURCE);
     }
+
+  } catch (error) {
+    console.log('catch/error: ', error);
+    res.status(500).json({
+      error: error
+    });
+  }
+
+});
+
+app.post('/createActivity', cors(), async (req, res) => {
+  try {
+
+    const body = JSON.parse(req.apiGateway.event.body);
+    console.log('body ', body);
+
+
+    const activityClass = new ActivityClass(body);
+    console.log('body ', body);
+    const resulquery = await activityClass.createActivity();
+    console.log('resulquery ', resulquery);
+    const resp = new ResponseClass();
+
+    if (resulquery) {
+      console.log('success 200');
+      res.json(resp.SUCCESS);
+    } else {
+      console.log('error en validacion de usuario  ');
+      res.status(404).json(resp.NOT_FOUND_RESOURCE);
+
+    }
+
+
+  } catch (error) {
+    console.log('catch/error: ', error);
+    res.status(500).json({
+      error: error
+    });
+  }
+
+});
+
+app.get('/activitys', cors(), async (req, res) => {
+  try {
+    console.log('/activitys ');
+    const resp = new ResponseClass();
+    const activtyDB = new DynamoDBClass();
+    const resulquery = await activtyDB.scanActivity();
+
+    console.log('resulquery ', resulquery);
+
+
+
+    if (resulquery) {
+      console.log('success 200');
+
+      res.json({
+        statusCode: 200,
+        message: "Success query activity",
+        detail: "Success",
+        body: resulquery.Items
+      });
+    } else {
+      console.log('error en validacion de usuario  ');
+      res.status(404).json(resp.NOT_FOUND_RESOURCE);
+
+    }
+
 
   } catch (error) {
     console.log('catch/error: ', error);

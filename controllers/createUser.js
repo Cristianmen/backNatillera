@@ -32,13 +32,8 @@ class UserClass {
          
     };
 
-    getUser() {
-        return this.user;
-    }
-    setUser(User) {
-        this.user = User;
-    }
-
+   
+   
     async  createUser() {
         try {
             console.log('createUser ');
@@ -57,12 +52,15 @@ class UserClass {
         }
 
 
+    } 
+    
+    setUser(user) {
+        this.user = user;
     }
 
     getUser() {
         return this.user;
     }
-
 
     getUserName() {
         return this.user.name;
